@@ -14,17 +14,44 @@
 2. Chọn **Hardware accelerator**: **T4 GPU** (hoặc A100 nếu có)
 3. Click **Save**
 
-## Bước 3: Chạy từng cell
+## Bước 3: Xin quyền truy cập model
+
+**QUAN TRỌNG:** TranslateGemma là gated model, bạn cần xin quyền trước:
+
+1. Truy cập https://huggingface.co/google/translategemma-12b-it
+2. Đăng nhập Hugging Face (tạo tài khoản nếu chưa có)
+3. Click nút **"Agree and access repository"**
+4. Đợi vài giây để được chấp thuận (thường tự động)
+
+## Bước 4: Tạo Hugging Face Token
+
+1. Truy cập https://huggingface.co/settings/tokens
+2. Click **"New token"**
+3. Đặt tên token (vd: "colab-translategemma")
+4. Chọn quyền **"Read"**
+5. Click **"Generate token"**
+6. Copy token (bắt đầu bằng `hf_...`)
+
+## Bước 5: Chạy từng cell
 
 Chạy lần lượt các cell từ trên xuống:
 
 ### Cell 1: Cài đặt thư viện (~30 giây)
 
 ```python
-!pip install -q transformers>=4.46.0 torch pillow accelerate sentencepiece protobuf
+!pip install -q transformers>=4.46.0 torch pillow accelerate sentencepiece protobuf huggingface_hub
 ```
 
-### Cell 2: Load model (~1-2 phút)
+### Cell 2: Đăng nhập Hugging Face
+
+```python
+from huggingface_hub import login
+login()  # Paste token khi được hỏi
+```
+
+**Lưu ý:** Khi chạy cell này, sẽ có ô nhập token. Paste token bạn vừa tạo vào.
+
+### Cell 3: Load model (~1-2 phút)
 
 ```python
 # Load TranslateGemma 12B
@@ -35,21 +62,21 @@ model = AutoModelForImageTextToText.from_pretrained(...)
 
 **Lưu ý:** Lần đầu load sẽ mất 1-2 phút để download model (~25GB)
 
-### Cell 3: Định nghĩa hàm dịch
+### Cell 4: Định nghĩa hàm dịch
 
 ```python
 def translate_text(text, source_lang="vi", target_lang="en"):
     ...
 ```
 
-### Cell 4-7: Test các ví dụ
+### Cell 5-8: Test các ví dụ
 
 - Dịch Tiếng Việt → Tiếng Anh
 - Dịch Tiếng Anh → Tiếng Việt
 - Dịch Tiếng Việt → Tiếng Trung
 - Dịch text từ ảnh
 
-### Cell 8: Dịch văn bản của bạn
+### Cell 9: Dịch văn bản của bạn
 
 Thay đổi text và ngôn ngữ theo ý muốn!
 
@@ -130,8 +157,18 @@ Và 39 ngôn ngữ khác!
 
 **3. "Model not found"**
 
-- Nguyên nhân: Chưa chạy cell load model
-- Giải pháp: Chạy lại Cell 2 (Load model)
+- Nguyên nhân: Chưa chạy cell load model hoặc chưa xin quyền truy cập
+- Giải pháp:
+  - Xin quyền tại https://huggingface.co/google/translategemma-12b-it
+  - Chạy lại Cell 2 (Login) và Cell 3 (Load model)
+
+**4. "Unauthorized" hoặc "Gated repo"**
+
+- Nguyên nhân: Chưa xin quyền truy cập model hoặc token sai
+- Giải pháp:
+  - Xin quyền tại https://huggingface.co/google/translategemma-12b-it
+  - Tạo token mới với quyền Read
+  - Chạy lại Cell 2 với token mới
 
 ## So sánh với Beam.cloud
 
